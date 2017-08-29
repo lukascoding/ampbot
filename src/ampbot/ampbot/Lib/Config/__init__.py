@@ -1,0 +1,3 @@
+'''
+a small config parser
+'''
