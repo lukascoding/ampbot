@@ -14,6 +14,9 @@ def Help():
 def Test():
     return config.answers.test
 
+def Rate(ratelink):
+    return config.answers.rate.format(ratelink)
+
 def Group(grouplink):
     return config.answers.group.format(grouplink)
 

@@ -70,10 +70,18 @@ def test(bot, update):
     bot.sendMessage(update.message.chat_id, Answers.Test())
 
 @run_async
+def rate(bot, update):
+    bot.sendMessage(
+        update.message.chat_id,
+        Answers.Rate('{0}={1}'.format(config.production.bot.rateLink, config.production.bot.username)),
+        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Rate now', url='{0}={1}'.format(config.production.bot.rateLink, config.production.bot.username))]]),
+        parse_mode=ParseMode.MARKDOWN)
+
+@run_async
 def group(bot, update):
     bot.sendMessage(
         update.message.chat_id,
-        Answers.Group(),
+        Answers.Group(config.production.bot.groupLink),
         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Join now', url=config.production.bot.groupLink)]]),
         parse_mode=ParseMode.MARKDOWN)
 
@@ -303,6 +311,7 @@ def main():
             dp.add_handler(CommandHandler("start", start))
             dp.add_handler(CommandHandler("settings", settings))
             dp.add_handler(CommandHandler("help", help))
+            dp.add_handler(CommandHandler("rate", rate))
             dp.add_handler(CommandHandler("test", test))
             dp.add_handler(CommandHandler("group", group))
             dp.add_handler(CommandHandler("channel", channel))
