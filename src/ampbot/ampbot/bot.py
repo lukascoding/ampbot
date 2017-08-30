@@ -10,9 +10,11 @@ from Lib.Config import Parser
 from telegram.ext import *
 from telegram.error import Unauthorized, NetworkError
 from telegram.ext.dispatcher import run_async
-from telegram import InlineQueryResultArticle, InlineQueryResultAudio, InputTextMessageContent, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import InlineQueryResultArticle, InlineQueryResultAudio, InputTextMessageContent, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, MessageEntity
 from uuid import uuid4
 
+import re
+from pprint import pprint
 from emoji import emojize
 import arrow
 import logging
@@ -68,6 +70,14 @@ def test(bot, update):
     bot.sendMessage(update.message.chat_id, Answers.Test())
 
 @run_async
+def group(bot, update):
+    bot.sendMessage(
+        update.message.chat_id,
+        Answers.Group(),
+        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Join now', url=config.production.bot.groupLink)]]),
+        parse_mode=ParseMode.MARKDOWN)
+
+@run_async
 def issue(bot, update):
     logger.info('issues: {0}({1}): {2}'.format(update.message.from_user.username, update.message.from_user.id, update.message.text))
     bot.sendMessage(update.message.chat_id, Answers.Issue())
@@ -86,7 +96,11 @@ def channel(bot, update):
 
 @run_async
 def playlist(bot, update):
-    bot.sendMessage(update.message.chat_id, Answers.Playlist(), parse_mode=ParseMode.MARKDOWN)
+    bot.sendMessage(
+        update.message.chat_id,
+        Answers.Playlist(config.production.spotify.playlistUri, config.production.spotify.playlistFullId),
+        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Join now', url=config.production.spotify.playlistUri)]]),
+        parse_mode=ParseMode.MARKDOWN)
     
 @run_async
 def default(bot, update):
@@ -217,8 +231,11 @@ def callback(bot, update):
 
 @run_async
 def chosen(bot, update):
-    id = update['chosen_inline_result']['result_id']
-    Playlist.addTrack(id, config)
+    id = update.chosen_inline_result.result_id
+    username = update.chosen_inline_result.from_user.first_name
+    if 'spotify:track:' in id:
+        Playlist.addTrack(id, config)
+        Playlist.updatePlaylistName(update.chosen_inline_result.from_user.first_name, config)
 
 @run_async
 def new(bot, update):
@@ -232,6 +249,30 @@ def new(bot, update):
             message += '{0}. [{1}]({2}) by {3}\n'.format(count, album['name'], album['external_urls']['spotify'], album['artists'][0]['name'])
             count += 1
     bot.sendMessage(update.message.chat_id, message, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+
+@run_async
+def add(bot, update, args, user_data, chat_data):
+    if len(args) > 0:
+        if 'spotify:track:' in args[0]:
+            Playlist.addTrack(args[0], config)
+            Playlist.updatePlaylistName(update.message.from_user.first_name, config)
+        if 'https://open.spotify.com/track/' in args[0]:
+            Playlist.addTrack(args[0].replace("https://open.spotify.com/track/", "spotify:track:"), config)
+            Playlist.updatePlaylistName(update.message.from_user.first_name, config)
+    else:
+        if update.message.reply_to_message != None:
+            matches = re.findall(r"spotify:track:[^\s]+", update.message.reply_to_message.text)
+            if len(matches) > 0:
+                for match in matches:
+                    if 'spotify:track:' in match:
+                        Playlist.addTrack(match, config)
+                        Playlist.updatePlaylistName(update.message.from_user.first_name, config)
+            for entity in update.message.reply_to_message.entities:
+                if entity.type == MessageEntity.TEXT_LINK:
+                    if 'https://open.spotify.com/track/' in entity.url:
+                        Playlist.addTrack(entity.url.replace("https://open.spotify.com/track/", "spotify:track:"), config)
+                        Playlist.updatePlaylistName(update.message.from_user.first_name, config)
+    
 
 @run_async
 def cancel(bot, update):
@@ -263,9 +304,11 @@ def main():
             dp.add_handler(CommandHandler("settings", settings))
             dp.add_handler(CommandHandler("help", help))
             dp.add_handler(CommandHandler("test", test))
+            dp.add_handler(CommandHandler("group", group))
             dp.add_handler(CommandHandler("channel", channel))
             dp.add_handler(CommandHandler("playlist", playlist))
             dp.add_handler(CommandHandler("new", new))
+            dp.add_handler(CommandHandler("add", add, pass_user_data=True, pass_chat_data=True, pass_args=True))
             dp.add_handler(CallbackQueryHandler(callback))
             dp.add_handler(InlineQueryHandler(inline))
             dp.add_handler(ChosenInlineResultHandler(chosen))
