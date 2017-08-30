@@ -12,7 +12,10 @@ def Help():
     return config.answers.help
 
 def Test():
-    return config.answers.Test
+    return config.answers.test
+
+def Group(grouplink):
+    return config.answers.group.format(grouplink)
 
 def Issue():
     return config.answers.issue
@@ -23,8 +26,8 @@ def SendToAdmin():
 def Channel():
     return config.answers.channel
 
-def Playlist():
-    return config.answers.playlist
+def Playlist(playlistUri, playlistId):
+    return config.answers.playlist.format(playlistUri, playlistId)
 
 def Default():
     return config.answers.default
