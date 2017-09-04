@@ -28,6 +28,9 @@
     <Compile Include="Lib\ampbot\Answers.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Lib\ampbot\Logger.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Lib\ampbot\Parse.py">
       <SubType>Code</SubType>
     </Compile>
