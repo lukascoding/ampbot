@@ -1,9 +1,10 @@
 from Lib.Config import Parser
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
+import logging
 
 from Lib.ampbot import Logger
-logger = Logger.ConfigureLogging()
+logger = Logger.ConfigureLogger(__name__)
 
 def getResults(query, config):
     logger.info('search spotify for query "{0}"'.format(query))

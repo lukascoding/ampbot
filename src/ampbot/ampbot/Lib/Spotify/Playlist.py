@@ -1,11 +1,11 @@
 from Lib.Config import Parser
-from Lib.ampbot import Logger
 import spotipy
 import spotipy.util as util
 import arrow
 import logging
 
-logger = Logger.ConfigureLogging()
+from Lib.ampbot import Logger
+logger = Logger.ConfigureLogger(__name__)
 
 def addTrack(id, config):
     if 'spotify:track:' in id:

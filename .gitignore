@@ -262,3 +262,5 @@ __pycache__/
 *.ini
 
 src/ampbot/ampbot/\.cache-lukascoding
+
+src/ampbot/ampbot/logs/
