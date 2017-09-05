@@ -28,6 +28,9 @@
     <Compile Include="Lib\ampbot\Answers.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Lib\ampbot\Database.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Lib\ampbot\Logger.py">
       <SubType>Code</SubType>
     </Compile>
@@ -68,6 +71,7 @@
   <ItemGroup>
     <Content Include=".cache-lukascoding" />
     <Content Include="ampbot.ini" />
+    <Content Include="requirements.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Bot.py"""
 #own
-from Lib.ampbot import Parse, Answers, Logger
+from Lib.ampbot import Parse, Answers, Logger, Database
 from Lib.Spotify import Search, Playlist, Releases
 from Lib.Config import Parser
 
@@ -44,7 +44,7 @@ tgBot = None
 clientId = None
 clientSecret = None
 
-logger = Logger.ConfigureLogging()
+logger = Logger.ConfigureLogger(__name__)
 
 @run_async
 def start(bot, update):
