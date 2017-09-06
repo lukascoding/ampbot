@@ -3,14 +3,14 @@
 """Bot.py"""
 #own
 from Lib.ampbot import Parse, Answers, Logger, Database
-from Lib.Spotify import Search, Playlist, Releases
+from Lib.Spotify import Search, Playlist, Releases, Track
 from Lib.Config import Parser
 
 #packages
 from telegram.ext import *
 from telegram.error import Unauthorized, NetworkError
 from telegram.ext.dispatcher import run_async
-from telegram import InlineQueryResultArticle, InlineQueryResultAudio, InputTextMessageContent, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, MessageEntity
+from telegram import InlineQueryResultArticle, InlineQueryResultAudio, InputTextMessageContent, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, MessageEntity, Bot
 from uuid import uuid4
 
 import re
@@ -49,23 +49,23 @@ logger = Logger.ConfigureLogger(__name__)
 @run_async
 def start(bot, update):
     bot.sendMessage(update.message.chat_id, Answers.Start(), parse_mode=ParseMode.MARKDOWN)
-    logger.info('START: {0}({1})'.format(update.message.from_user.username, update.message.from_user.id))
+    logger.info('START: @{0}({1})'.format(update.message.from_user.username, update.message.from_user.id))
 
 @run_async
 def settings(bot, update):
     bot.sendMessage(update.message.chat_id, Answers.Settings())
-    logger.info('SETTINGS: {0}({1})'.format(update.message.from_user.username, update.message.from_user.id))
+    logger.info('SETTINGS: @{0}({1})'.format(update.message.from_user.username, update.message.from_user.id))
 
 @run_async
 def help(bot, update):
     bot.sendMessage(update.message.chat_id, Answers.Help())
-    logger.info('HELP: {0}({1})'.format(update.message.from_user.username, update.message.from_user.id))
+    logger.info('HELP: @{0}({1})'.format(update.message.from_user.username, update.message.from_user.id))
 
 @run_async
 def test(bot, update):
     print(str(update))
     bot.sendMessage(update.message.chat_id, Answers.Test())
-    logger.info('TEST: {0}({1})'.format(update.message.from_user.username, update.message.from_user.id))
+    logger.info('TEST: @{0}({1})'.format(update.message.from_user.username, update.message.from_user.id))
 
 @run_async
 def rate(bot, update):
@@ -74,7 +74,7 @@ def rate(bot, update):
         Answers.Rate('{0}={1}'.format(config.production.bot.rateLink, config.production.bot.username)),
         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Rate now', url='{0}={1}'.format(config.production.bot.rateLink, config.production.bot.username))]]),
         parse_mode=ParseMode.MARKDOWN)
-    logger.info('RATE: {0}({1})'.format(update.message.from_user.username, update.message.from_user.id))
+    logger.info('RATE: @{0}({1})'.format(update.message.from_user.username, update.message.from_user.id))
 
 @run_async
 def group(bot, update):
@@ -83,17 +83,17 @@ def group(bot, update):
         Answers.Group(config.production.bot.groupLink),
         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Join now', url=config.production.bot.groupLink)]]),
         parse_mode=ParseMode.MARKDOWN)
-    logger.info('GROUP: {0}({1})'.format(update.message.from_user.username, update.message.from_user.id))
+    logger.info('GROUP: @{0}({1})'.format(update.message.from_user.username, update.message.from_user.id))
 
 @run_async
 def issue(bot, update):
-    logger.info('ISSUE: {0}({1}): {2}'.format(update.message.from_user.username, update.message.from_user.id, update.message.text))
+    logger.info('ISSUE: @{0}({1}): {2}'.format(update.message.from_user.username, update.message.from_user.id, update.message.text))
     bot.sendMessage(update.message.chat_id, Answers.Issue())
     return ISSUES
 
 @run_async
 def sendToAdmin(bot, update):
-    logger.info('sendToAdmin: {0}({1}): {2}'.format(update.message.from_user.username, update.message.from_user.id, update.message.text))
+    logger.info('sendToAdmin: @{0}({1}): {2}'.format(update.message.from_user.username, update.message.from_user.id, update.message.text))
     bot.forwardMessage(8139296, update.message.chat_id, update.message.message_id)
     bot.sendMessage(update.message.chat_id, Answers.SendToAdmin())
     return ConversationHandler.END
@@ -101,7 +101,7 @@ def sendToAdmin(bot, update):
 @run_async
 def channel(bot, update):
     bot.sendMessage(update.message.chat_id, Answers.Channel())
-    logger.info('CHANNEL: {0}({1})'.format(update.message.from_user.username, update.message.from_user.id))
+    logger.info('CHANNEL: @{0}({1})'.format(update.message.from_user.username, update.message.from_user.id))
 
 @run_async
 def playlist(bot, update):
@@ -110,16 +110,16 @@ def playlist(bot, update):
         Answers.Playlist(config.production.spotify.playlistUri, config.production.spotify.playlistFullId),
         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Join now', url=config.production.spotify.playlistUri)]]),
         parse_mode=ParseMode.MARKDOWN)
-    logger.info('PLAYLIST: {0}({1})'.format(update.message.from_user.username, update.message.from_user.id))
+    logger.info('PLAYLIST: @{0}({1})'.format(update.message.from_user.username, update.message.from_user.id))
     
 @run_async
 def default(bot, update):
-    logger.info('DEFAULT: {0}({1}): {2}'.format(update.message.from_user.username, update.message.from_user.id, update.message.text))
+    logger.info('DEFAULT: @{0}({1}): {2}'.format(update.message.from_user.username, update.message.from_user.id, update.message.text))
     if update.message.from_user.id == 8139296:
         if update.message.reply_to_message:
             bot.sendMessage(update.message.reply_to_message.forward_from.id, update.message.text, reply_to_message_id=update.message.reply_to_message.message_id-1)
     else:
-        bot.sendMessage(update.message.chat_id, Answers.Default())
+        pass
 
 
 def inline(bot, update):
@@ -233,18 +233,41 @@ def inline(bot, update):
                         )
                     )
         bot.answerInlineQuery(update.inline_query.id, inline)
-        logger.info('INLINE: {0}({1}): {2}'.format(update.inline_query.from_user.username, update.inline_query.from_user.id, update.inline_query.query))
+        logger.info('INLINE: @{0}({1}): {2}'.format(update.inline_query.from_user.username, update.inline_query.from_user.id, update.inline_query.query))
+    elif len(query) == 0 or query == None:
+        inline.append(
+                        InlineQueryResultArticle(
+                            id=uuid4(),
+                            title='to get the new Releases',
+                            description='type in "new albums"',
+                            reply_markup=None,
+                            input_message_content=InputTextMessageContent('How to use my inline query?\n\nto get the new Releases type in "`new albums`"', parse_mode=ParseMode.MARKDOWN)
+                        )
+                    )
+        inline.append(
+                        InlineQueryResultArticle(
+                            id=uuid4(),
+                            title='to get the a track/album/artist/playlist',
+                            description='type in "track/album/artist/playlist"',
+                            reply_markup=None,
+                            input_message_content=InputTextMessageContent('How to use my inline query?\n\nto get the a track/album/artist/playlist type in "`track/album/artist/playlist`"', parse_mode=ParseMode.MARKDOWN)
+                        )
+                    )
+        bot.answerInlineQuery(update.inline_query.id, inline, switch_pm_text='How to use my inline query?', switch_pm_parameter='help')
+        logger.info('INLINE: @{0}({1}): {2}'.format(update.inline_query.from_user.username, update.inline_query.from_user.id, update.inline_query.query))
+    else:
+        pass
 
 @run_async
 def callback(bot, update):
     query = update.callback_query
-    logger.info('CALLBACK: {0}({1})'.format(update.message.from_user.username, update.message.from_user.id))
+    logger.info('CALLBACK: @{0}({1})'.format(update.message.from_user.username, update.message.from_user.id))
 
 @run_async
 def chosen(bot, update):
     id = update.chosen_inline_result.result_id
     username = update.chosen_inline_result.from_user.first_name
-    #logger.info('CHOSEN: {0}({1})'.format(update.chosen_inline_result.from_user.username, update.chosen_inline_result.from_user.id))
+    logger.info('CHOSEN: @{0}({1})'.format(update.chosen_inline_result.from_user.username, update.chosen_inline_result.from_user.id))
     if 'spotify:track:' in id:
         if Playlist.addTrack(id, config):
             Playlist.updatePlaylistName(update.chosen_inline_result.from_user.first_name, config)
@@ -267,31 +290,53 @@ def new(bot, update):
 def add(bot, update, args, user_data, chat_data):
     if len(args) > 0:
         if 'spotify:track:' in args[0]:
-            Playlist.addTrack(args[0], config)
-            Playlist.updatePlaylistName(update.message.from_user.first_name, config)
+            if Playlist.addTrack(args[0], config):
+                update.message.reply_text(Parse.TrackAddedSuccessDescription(Track.getTrackById(args[0], config)))
+                Playlist.updatePlaylistName(update.message.from_user.first_name, config)
+            else:
+                update.message.reply_text(Parse.TrackAddedFailedDescription(Track.getTrackById(args[0], config)))
+
         if 'https://open.spotify.com/track/' in args[0]:
-            Playlist.addTrack(args[0].replace("https://open.spotify.com/track/", "spotify:track:"), config)
-            Playlist.updatePlaylistName(update.message.from_user.first_name, config)
-    else:
-        if update.message.reply_to_message != None:
+            if Playlist.addTrack(args[0].replace("https://open.spotify.com/track/", "spotify:track:"), config):
+                update.message.reply_text(Parse.TrackAddedSuccessDescription(Track.getTrackById(args[0].replace("https://open.spotify.com/track/", "spotify:track:"), config)))
+                Playlist.updatePlaylistName(update.message.from_user.first_name, config)
+            else:
+                update.message.reply_text(Parse.TrackAddedFailedDescription(Track.getTrackById(args[0].replace("https://open.spotify.com/track/", "spotify:track:"), config)))
+    elif update.message.reply_to_message != None:
             matches = re.findall(r"spotify:track:[^\s]+", update.message.reply_to_message.text)
             if len(matches) > 0:
                 for match in matches:
                     if 'spotify:track:' in match:
-                        Playlist.addTrack(match, config)
-                        Playlist.updatePlaylistName(update.message.from_user.first_name, config)
+                        if Playlist.addTrack(match, config):
+                            update.message.reply_text(Parse.TrackAddedSuccessDescription(Track.getTrackById(match, config)))
+                            Playlist.updatePlaylistName(update.message.from_user.first_name, config)
+                        else:
+                            update.message.reply_text(Parse.TrackAddedFailedDescription(Track.getTrackById(match, config)))
+
             for entity in update.message.reply_to_message.entities:
-                if entity.type == MessageEntity.TEXT_LINK:
+                if entity.type == MessageEntity.URL:
+                    if 'https://open.spotify.com/track/' in update.message.reply_to_message.text[entity.offset:entity.offset+entity.length]:
+                        if Playlist.addTrack(update.message.reply_to_message.text[entity.offset:entity.offset+entity.length].replace("https://open.spotify.com/track/", "spotify:track:"), config):
+                            update.message.reply_text(Parse.TrackAddedSuccessDescription(Track.getTrackById(update.message.reply_to_message.text[entity.offset:entity.offset+entity.length].replace("https://open.spotify.com/track/", "spotify:track:"), config)))
+                            Playlist.updatePlaylistName(update.message.from_user.first_name, config)
+                        else:
+                            update.message.reply_text(Parse.TrackAddedFailedDescription(Track.getTrackById(update.message.reply_to_message.text[entity.offset:entity.offset+entity.length].replace("https://open.spotify.com/track/", "spotify:track:"), config)))
+                elif entity.type == MessageEntity.TEXT_LINK:
                     if 'https://open.spotify.com/track/' in entity.url:
-                        Playlist.addTrack(entity.url.replace("https://open.spotify.com/track/", "spotify:track:"), config)
-                        Playlist.updatePlaylistName(update.message.from_user.first_name, config)
-    
+                        if Playlist.addTrack(entity.url.replace("https://open.spotify.com/track/", "spotify:track:"), config):
+                            update.message.reply_text(Parse.TrackAddedSuccessDescription(Track.getTrackById(entity.url.replace("https://open.spotify.com/track/", "spotify:track:"), config)))
+                            Playlist.updatePlaylistName(update.message.from_user.first_name, config)
+                        else:
+                            update.message.reply_text(Parse.TrackAddedFailedDescription(Track.getTrackById(entity.url.replace("https://open.spotify.com/track/", "spotify:track:"), config)))
+                else:
+                    pass
+                                
 
 @run_async
 def cancel(bot, update):
     user = update.message.from_user
     update.message.reply_text('action canceled')
-    logger.info('CANCEL: {0}({1})'.format(update.message.from_user.username, update.message.from_user.id))
+    logger.info('CANCEL: @{0}({1})'.format(update.message.from_user.username, update.message.from_user.id))
     return ConversationHandler.END
     
         

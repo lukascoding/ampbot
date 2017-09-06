@@ -156,6 +156,12 @@ def TrackInlineDescription(track):
 def TrackInlineDescriptionWithOutPreview(track):
     return '{0} by {1} from {2}'.format(TrackName(track), TrackArtists(track), TrackAlbumName(track))
 
+def TrackAddedSuccessDescription(track):
+    return 'successfully added {0} by {1}'.format(TrackName(track), TrackArtists(track))
+
+def TrackAddedFailedDescription(track):
+    return '{0} by {1} already in playlist'.format(TrackName(track), TrackArtists(track))
+
 def ArtistInlineTitle(artist):
     return 'Artist: {0}'.format(ArtistName(artist))
 
