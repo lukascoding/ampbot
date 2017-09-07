@@ -21,15 +21,15 @@ def ConfigureHandler(logger):
     channel.setLevel(logging.INFO)
     channel.setFormatter(logFormat)
     
-    timed = TgTimedRotatingFileHandler('logs/ampbot', config.production.logger.token, config.production.logger.channel, when='D', backupCount=10)
-    timed.setLevel(logging.INFO)
-    timed.setFormatter(logFormat)
+    #timed = TgTimedRotatingFileHandler('logs/ampbot', config.production.logger.token, config.production.logger.channel, when='D', backupCount=10)
+    #timed.setLevel(logging.INFO)
+    #timed.setFormatter(logFormat)
 
     file = logging.FileHandler('ampbot.log')
     file.setLevel(logging.INFO)
     file.setFormatter(logFormat)
     
-    logger.addHandler(timed)
+    #logger.addHandler(timed)
     logger.addHandler(file)
     logger.addHandler(channel)
     return logger

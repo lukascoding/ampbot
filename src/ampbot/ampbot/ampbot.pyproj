@@ -31,6 +31,21 @@
     <Compile Include="Lib\ampbot\Database.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Lib\ampbot\Filter.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Lib\ampbot\Functions\ConversationCommand.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Lib\ampbot\Functions\CostlyCommand.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Lib\ampbot\Functions\NormalCommand.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Lib\ampbot\Functions\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Lib\ampbot\Logger.py">
       <SubType>Code</SubType>
     </Compile>
@@ -68,6 +83,7 @@
   <ItemGroup>
     <Folder Include="Lib\" />
     <Folder Include="Lib\ampbot\" />
+    <Folder Include="Lib\ampbot\Functions\" />
     <Folder Include="Lib\Config\" />
     <Folder Include="Lib\Spotify\" />
   </ItemGroup>
