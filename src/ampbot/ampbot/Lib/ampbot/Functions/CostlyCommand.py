@@ -1,7 +1,7 @@
 """CostlyCommand.py"""
 from Lib.ampbot import Answers, Logger, Parse
 from Lib.Spotify import Search, Playlist, Releases, Track
-from Lib.Genius import Lyrics, Search
+from Lib.Genius import Lyrics, Search as GeniusSearch
 from Lib.Config import Parser
 from telegram.ext.dispatcher import run_async
 from telegram import InlineQueryResultArticle, InlineQueryResultAudio, InputTextMessageContent, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, MessageEntity, Bot, constants
@@ -161,11 +161,12 @@ def ProcessCallbackQuery(bot, update):
                 inline_message_id = update.callback_query.inline_message_id,
                 text = 'one moment please')
             trackLyrics = Lyrics.getLyrics('{0} {1}'.format(Parse.TrackName(track), Parse.TrackFirstArtist(track)), config)
-            if len(trackLyrics) > constants.MAX_MESSAGE_LENGTH:
-                trackLyrics = trackLyrics[0:constants.MAX_MESSAGE_LENGTH-1]
+            message = '{0} by {1}\n\n{2}'.format(Parse.TrackName(track), Parse.TrackArtists(track), trackLyrics)
+            if len(message) > constants.MAX_MESSAGE_LENGTH:
+                message = message[0:constants.MAX_MESSAGE_LENGTH-1]
             bot.edit_message_text(
                 inline_message_id = update.callback_query.inline_message_id,
-                text = '{0} by {1}\n\n{2}'.format(Parse.TrackName(track), Parse.TrackArtists(track), trackLyrics),
+                text = message,
                 reply_markup = InlineKeyboardMarkup(
                     [
                         [InlineKeyboardButton('back', callback_data='back:{0}'.format(track['id']))]
@@ -237,7 +238,7 @@ def ProcessAddTrackToPlaylist(bot, update, args, user_data, chat_data):
 @run_async
 def ProcessGetLyricsForQuery(bot, update, args):
     lyric = Lyrics.getLyrics(' '.join(args), config)
-    track = Search.getTrack(' '.join(args), config)
+    track = GeniusSearch.getTrack(' '.join(args), config)
     message = '{0}\n\n{1}'.format(track['full_title'], lyric)
     if len(message) > constants.MAX_MESSAGE_LENGTH:
         message = message[0:constants.MAX_MESSAGE_LENGTH-1]
