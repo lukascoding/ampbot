@@ -114,6 +114,12 @@ def ArtistFollower(artist):
 
 #Artist
 
+def TrackFirstArtist(track):
+    if len(track['artists']) > 0:
+        return track['artists'][0]['name']
+    else:
+        return ''
+
 def TrackArtists(track):
     artists = ''
     if len(track['artists']) > 0:

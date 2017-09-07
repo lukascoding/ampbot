@@ -94,6 +94,9 @@ def chosen(bot, update):
 def callback(bot, update):
     CostlyCommand.ProcessCallbackQuery(bot, update)
 
+def lyrics(bot, update, args):
+    CostlyCommand.ProcessGetLyricsForQuery(bot, update, args)
+
 def new(bot, update):
     CostlyCommand.ProcessNewAlbumReleases(bot, update)    
 
@@ -123,6 +126,7 @@ def main():
 
             dp.add_handler(CommandHandler("new", new))
             dp.add_handler(CommandHandler("add", add, pass_user_data=True, pass_chat_data=True, pass_args=True))
+            dp.add_handler(CommandHandler("lyrics", lyrics, pass_args=True))
             dp.add_handler(CallbackQueryHandler(callback))
             dp.add_handler(InlineQueryHandler(inline))
             dp.add_handler(ChosenInlineResultHandler(chosen))

@@ -25,6 +25,9 @@
     <Compile Include="cleanPlaylist.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="getLyricsOfTrack.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Lib\ampbot\Answers.py">
       <SubType>Code</SubType>
     </Compile>
@@ -61,6 +64,15 @@
     <Compile Include="Lib\Config\__init__.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Lib\Genius\Lyrics.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Lib\Genius\Search.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Lib\Genius\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Lib\Spotify\Playlist.py">
       <SubType>Code</SubType>
     </Compile>
@@ -85,6 +97,7 @@
     <Folder Include="Lib\ampbot\" />
     <Folder Include="Lib\ampbot\Functions\" />
     <Folder Include="Lib\Config\" />
+    <Folder Include="Lib\Genius\" />
     <Folder Include="Lib\Spotify\" />
   </ItemGroup>
   <ItemGroup>

@@ -1,9 +1,10 @@
 """CostlyCommand.py"""
 from Lib.ampbot import Answers, Logger, Parse
 from Lib.Spotify import Search, Playlist, Releases, Track
+from Lib.Genius import Lyrics, Search
 from Lib.Config import Parser
 from telegram.ext.dispatcher import run_async
-from telegram import InlineQueryResultArticle, InlineQueryResultAudio, InputTextMessageContent, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, MessageEntity, Bot
+from telegram import InlineQueryResultArticle, InlineQueryResultAudio, InputTextMessageContent, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, MessageEntity, Bot, constants
 from uuid import uuid4
 import timeit
 import arrow
@@ -55,12 +56,20 @@ def ProcessInlineQuery(bot, update):
                                 audio_url=Parse.TrackPreviewUrl(track),
                                 performer=Parse.TrackArtists(track),
                                 title=Parse.TrackInlineTitle(track),
-                                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Go to Spotify', url=Parse.TrackUrl(track))]]),
+                                reply_markup=InlineKeyboardMarkup(
+                                    [
+                                        [InlineKeyboardButton('Go to Spotify', url=Parse.TrackUrl(track)),
+                                         InlineKeyboardButton('Lyrics', callback_data='spotify:track:{0}'.format(track['id']))]
+                                    ]),
                                 input_message_content=InputTextMessageContent(Parse.TrackInlineInputMessage(track), ParseMode.MARKDOWN, False)))
                     else:
                         addInline(InlineQueryResultArticle(id='spotify:track:{0}'.format(track['id']), #uuid4(),
                             title=Parse.TrackInlineTitleWithOutPreview(track),
-                            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton('Go to Spotify', url=Parse.TrackUrl(track))]]),
+                            reply_markup=InlineKeyboardMarkup(
+                                [
+                                    [InlineKeyboardButton('Go to Spotify', url=Parse.TrackUrl(track)),
+                                     InlineKeyboardButton('Lyrics', callback_data='spotify:track:{0}'.format(track['id']))]
+                                ]),
                             input_message_content=InputTextMessageContent(Parse.TrackInlineInputMessage(track), ParseMode.MARKDOWN, False),
                             description=Parse.TrackInlineDescriptionWithOutPreview(track),
                             url=Parse.TrackUrl(track),
@@ -130,7 +139,38 @@ def ProcessChosenInlineResult(bot, update):
 @run_async
 def ProcessCallbackQuery(bot, update):
     query = update.callback_query
-    logger.info('CALLBACK: @{0}({1})'.format(update.message.from_user.username, update.message.from_user.id))
+    id = query.data
+    if 'back:' in id:
+        track = Track.getTrackById(id.replace('back:', ''), config)
+        bot.edit_message_text(
+                inline_message_id = update.callback_query.inline_message_id,
+                text = 'one moment please')
+        bot.edit_message_text(
+            inline_message_id = update.callback_query.inline_message_id,
+            text = Parse.TrackInlineInputMessage(track),
+            parse_mode = ParseMode.MARKDOWN,
+            reply_markup = InlineKeyboardMarkup(
+                                    [
+                                        [InlineKeyboardButton('Go to Spotify', url=Parse.TrackUrl(track)),
+                                         InlineKeyboardButton('Lyrics', callback_data='spotify:track:{0}'.format(track['id']))]
+                                    ]))
+    elif 'spotify:track:' in id:
+        track = Track.getTrackById(id, config)
+        if track != None:
+            bot.edit_message_text(
+                inline_message_id = update.callback_query.inline_message_id,
+                text = 'one moment please')
+            trackLyrics = Lyrics.getLyrics('{0} {1}'.format(Parse.TrackName(track), Parse.TrackFirstArtist(track)), config)
+            if len(trackLyrics) > constants.MAX_MESSAGE_LENGTH:
+                trackLyrics = trackLyrics[0:constants.MAX_MESSAGE_LENGTH-1]
+            bot.edit_message_text(
+                inline_message_id = update.callback_query.inline_message_id,
+                text = '{0} by {1}\n\n{2}'.format(Parse.TrackName(track), Parse.TrackArtists(track), trackLyrics),
+                reply_markup = InlineKeyboardMarkup(
+                    [
+                        [InlineKeyboardButton('back', callback_data='back:{0}'.format(track['id']))]
+                    ]))
+    logger.info('CALLBACK: @{0}({1})'.format(query.from_user.username, query.from_user.id))
 
 @run_async
 def ProcessNewAlbumReleases(bot, update):
@@ -193,3 +233,12 @@ def ProcessAddTrackToPlaylist(bot, update, args, user_data, chat_data):
                             update.message.reply_text(Parse.TrackAddedFailedDescription(Track.getTrackById(id, config)))
                 else:
                     pass
+
+@run_async
+def ProcessGetLyricsForQuery(bot, update, args):
+    lyric = Lyrics.getLyrics(' '.join(args), config)
+    track = Search.getTrack(' '.join(args), config)
+    message = '{0}\n\n{1}'.format(track['full_title'], lyric)
+    if len(message) > constants.MAX_MESSAGE_LENGTH:
+        message = message[0:constants.MAX_MESSAGE_LENGTH-1]
+    bot.sendMessage(update.message.chat_id, message)
