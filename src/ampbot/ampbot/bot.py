@@ -44,6 +44,7 @@ clientSecret = None
 logger = Logger.ConfigureLogger(__name__)
 
 #NormalCommands
+@Logger.ExecutionTime
 def start(bot, update):
     NormalCommand.Start(bot, update)
 

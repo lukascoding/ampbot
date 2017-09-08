@@ -3,6 +3,7 @@ import os
 import codecs
 import arrow
 import logging
+import timeit
 import logging.config
 from logging.handlers import *
 from Lib.Config import Parser
@@ -78,3 +79,11 @@ class TgTimedRotatingFileHandler(TimedRotatingFileHandler):
                         caption=oldFilename,
                         disable_notification = True)
 
+def ExecutionTime(f):
+    def wrap(*args):
+        start = timeit.timeit()
+        call = f(*args)
+        end = timeit.timeit()
+        print('{0} - {1} s'.format(f.__name__, end - start))
+        return call
+    return wrap
