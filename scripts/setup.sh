@@ -1,0 +1,1 @@
+pip install -U -r src\ampbot\ampbot\requirements.txt
