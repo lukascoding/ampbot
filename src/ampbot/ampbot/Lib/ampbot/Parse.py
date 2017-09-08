@@ -203,3 +203,17 @@ def AlbumReleaseInlineTitle(count, album):
 
 def AlbumReleaseInlineInputMessage(album):
     return 'NEW RELEASE\n\n[{0}]({1}) by {2}'.format(AlbumName(album), AlbumUrl(album), AlbumArtists(album))
+
+def TrackStatsForNerds(stats):
+    return 'danceability: {danceability}%\nenergy: {energy}%\nloudness: {loudness} dB\nspeechiness: {speechiness}%\nacousticness: {acousticness}%\ninstrumentalness: {instrumentalness}%\nliveness: {liveness}%\nvalence: {valence}%\ntempo: {tempo} BPM\nduration: {duration} ms'.format(
+                  danceability=int(stats['danceability']*100),
+                  energy=int(stats['energy']*100),
+                  loudness=int(stats['loudness']),
+                  speechiness=int(stats['speechiness']*100),
+                  acousticness=int(stats['acousticness']*100),
+                  instrumentalness=int(stats['instrumentalness']*100),
+                  liveness=int(stats['liveness']*100),
+                  valence=int(stats['valence']*100),
+                  tempo=int(stats['tempo']),
+                  duration=stats['duration_ms']
+                  )

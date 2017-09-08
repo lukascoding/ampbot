@@ -23,12 +23,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="bot.py" />
-    <Compile Include="cleanPlaylist.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="getLyricsOfTrack.py">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Lib\ampbot\Answers.py">
       <SubType>Code</SubType>
     </Compile>

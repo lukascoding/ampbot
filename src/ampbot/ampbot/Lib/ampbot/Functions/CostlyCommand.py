@@ -59,7 +59,8 @@ def ProcessInlineQuery(bot, update):
                                 reply_markup=InlineKeyboardMarkup(
                                     [
                                         [InlineKeyboardButton('Go to Spotify', url=Parse.TrackUrl(track)),
-                                         InlineKeyboardButton('Lyrics', callback_data='spotify:track:{0}'.format(track['id']))]
+                                         InlineKeyboardButton('Lyrics', callback_data='spotify:track:{0}'.format(track['id']))],
+                                        [InlineKeyboardButton('Stats 4 Nerds', callback_data='stats:{0}'.format(track['id']))]
                                     ]),
                                 input_message_content=InputTextMessageContent(Parse.TrackInlineInputMessage(track), ParseMode.MARKDOWN, False)))
                     else:
@@ -68,7 +69,8 @@ def ProcessInlineQuery(bot, update):
                             reply_markup=InlineKeyboardMarkup(
                                 [
                                     [InlineKeyboardButton('Go to Spotify', url=Parse.TrackUrl(track)),
-                                     InlineKeyboardButton('Lyrics', callback_data='spotify:track:{0}'.format(track['id']))]
+                                     InlineKeyboardButton('Lyrics', callback_data='spotify:track:{0}'.format(track['id']))],
+                                    [InlineKeyboardButton('Stats 4 Nerds', callback_data='stats:{0}'.format(track['id']))]
                                 ]),
                             input_message_content=InputTextMessageContent(Parse.TrackInlineInputMessage(track), ParseMode.MARKDOWN, False),
                             description=Parse.TrackInlineDescriptionWithOutPreview(track),
@@ -152,8 +154,30 @@ def ProcessCallbackQuery(bot, update):
             reply_markup = InlineKeyboardMarkup(
                                     [
                                         [InlineKeyboardButton('Go to Spotify', url=Parse.TrackUrl(track)),
-                                         InlineKeyboardButton('Lyrics', callback_data='spotify:track:{0}'.format(track['id']))]
+                                         InlineKeyboardButton('Lyrics', callback_data='spotify:track:{0}'.format(track['id']))],
+                                         [InlineKeyboardButton('Stats 4 Nerds', callback_data='stats:{0}'.format(track['id']))]
                                     ]))
+    elif 'stats:' in id:
+        bot.edit_message_text(
+                inline_message_id = update.callback_query.inline_message_id,
+                text = 'one moment please')
+        id = id.replace('stats:', '')
+        message = ''
+        track = Track.getTrackById(id, config)
+        stats = Track.getTrackAnalysis(id, config)
+        if track != None and stats != None:
+            message = '{0} by {1}'.format(Parse.TrackName(track), Parse.TrackArtists(track))
+            if len(stats) > 0:
+                message += '\n\n{0}'.format(Parse.TrackStatsForNerds(stats[0]))
+            else:
+                message += '\n\n{0}'.format('no stats found')
+        bot.edit_message_text(
+        inline_message_id = update.callback_query.inline_message_id,
+        text = message,
+        reply_markup = InlineKeyboardMarkup(
+            [
+                [InlineKeyboardButton('back', callback_data='back:{0}'.format(track['id']))]
+            ]))
     elif 'spotify:track:' in id:
         track = Track.getTrackById(id, config)
         if track != None:
